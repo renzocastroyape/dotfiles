@@ -194,47 +194,48 @@ else
 fi
 
 # --- ~/.netrc entries (optional) --------------------------------------------
-# Existing ~/.netrc files are never modified. Credentials are read from .env.
+# Credentials are read from .env. Existing entries are preserved.
 if [ -f "$HOME/.netrc" ]; then
-  skip "~/.netrc (existing file is left unchanged)"
+  log "~/.netrc already exists; preserving it and adding only missing entries"
 else
-  NETRC_CONTENT=""
+  log "~/.netrc does not exist; it will be created if an entry is selected"
+fi
 
-  if confirm "Add optional 'sdk facephi' entry to ~/.netrc?"; then
-    if [ -n "${NETRC_FACEPHI_HOST:-}" ] &&
-       [ -n "${NETRC_FACEPHI_LOGIN:-}" ] &&
-       [ -n "${NETRC_FACEPHI_PASSWORD:-}" ]; then
-      NETRC_CONTENT+="# sdk facephi
-machine $NETRC_FACEPHI_HOST
-  login $NETRC_FACEPHI_LOGIN
-  password $NETRC_FACEPHI_PASSWORD
-"
-    else
-      log "Skipping sdk facephi entry: set NETRC_FACEPHI_HOST, NETRC_FACEPHI_LOGIN and NETRC_FACEPHI_PASSWORD in .env"
-    fi
-  fi
+netrc_has_host() {
+  [ -f "$HOME/.netrc" ] &&
+    awk -v host="$1" '$1 == "machine" && $2 == host { found = 1 } END { exit !found }' "$HOME/.netrc"
+}
 
-  if confirm "Add optional 'sdk io-baas' entry to ~/.netrc?"; then
-    if [ -n "${NETRC_IO_BAAS_HOST:-}" ] &&
-       [ -n "${NETRC_IO_BAAS_LOGIN:-}" ] &&
-       [ -n "${NETRC_IO_BAAS_PASSWORD:-}" ]; then
-      NETRC_CONTENT+="# sdk io-baas
-machine $NETRC_IO_BAAS_HOST
-  login $NETRC_IO_BAAS_LOGIN
-  password $NETRC_IO_BAAS_PASSWORD
-"
-    else
-      log "Skipping sdk io-baas entry: set NETRC_IO_BAAS_HOST, NETRC_IO_BAAS_LOGIN, and NETRC_IO_BAAS_PASSWORD in .env"
-    fi
-  fi
+add_netrc_entry() {
+  local label="$1" host="$2" login="$3" password="$4"
 
-  if [ -n "$NETRC_CONTENT" ]; then
-    log "Creating ~/.netrc with permissions 600"
-    (umask 077; printf '%s' "$NETRC_CONTENT" > "$HOME/.netrc")
-    chmod 600 "$HOME/.netrc"
+  if [ -z "$host" ] || [ -z "$login" ] || [ -z "$password" ]; then
+    log "Skipping $label entry: required NETRC_* values are missing from .env"
+  elif netrc_has_host "$host"; then
+    skip "$label entry for $host (already present in ~/.netrc)"
   else
-    log "No ~/.netrc entries selected"
+    if [ -s "$HOME/.netrc" ] && [ "$(tail -c 1 "$HOME/.netrc" | wc -l | tr -d ' ')" -eq 0 ]; then
+      printf '\n' >> "$HOME/.netrc"
+    fi
+    (umask 077; printf '# %s\nmachine %s\n  login %s\n  password %s\n' \
+      "$label" "$host" "$login" "$password" >> "$HOME/.netrc")
+    chmod 600 "$HOME/.netrc"
+    log "Added $label entry for $host to ~/.netrc"
   fi
+}
+
+if confirm "Configure optional 'sdk facephi' entry in ~/.netrc?"; then
+  add_netrc_entry "sdk facephi" \
+    "${NETRC_FACEPHI_HOST:-}" "${NETRC_FACEPHI_LOGIN:-}" "${NETRC_FACEPHI_PASSWORD:-}"
+else
+  log "Skipping sdk facephi entry"
+fi
+
+if confirm "Configure optional 'sdk io-baas' entry in ~/.netrc?"; then
+  add_netrc_entry "sdk io-baas" \
+    "${NETRC_IO_BAAS_HOST:-}" "${NETRC_IO_BAAS_LOGIN:-}" "${NETRC_IO_BAAS_PASSWORD:-}"
+else
+  log "Skipping sdk io-baas entry"
 fi
 
 # --- Wire this repo's .zshrc into ~/.zshrc ---------------------------------

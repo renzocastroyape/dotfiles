@@ -193,6 +193,50 @@ else
   skip "~/.ssh/config"
 fi
 
+# --- ~/.netrc entries (optional) --------------------------------------------
+# Existing ~/.netrc files are never modified. Credentials are read from .env.
+if [ -f "$HOME/.netrc" ]; then
+  skip "~/.netrc (existing file is left unchanged)"
+else
+  NETRC_CONTENT=""
+
+  if confirm "Add optional 'sdk facephi' entry to ~/.netrc?"; then
+    if [ -n "${NETRC_FACEPHI_HOST:-}" ] &&
+       [ -n "${NETRC_FACEPHI_LOGIN:-}" ] &&
+       [ -n "${NETRC_FACEPHI_PASSWORD:-}" ]; then
+      NETRC_CONTENT+="# sdk facephi
+machine $NETRC_FACEPHI_HOST
+  login $NETRC_FACEPHI_LOGIN
+  password $NETRC_FACEPHI_PASSWORD
+"
+    else
+      log "Skipping sdk facephi entry: set NETRC_FACEPHI_HOST, NETRC_FACEPHI_LOGIN and NETRC_FACEPHI_PASSWORD in .env"
+    fi
+  fi
+
+  if confirm "Add optional 'sdk io-baas' entry to ~/.netrc?"; then
+    if [ -n "${NETRC_IO_BAAS_HOST:-}" ] &&
+       [ -n "${NETRC_IO_BAAS_LOGIN:-}" ] &&
+       [ -n "${NETRC_IO_BAAS_PASSWORD:-}" ]; then
+      NETRC_CONTENT+="# sdk io-baas
+machine $NETRC_IO_BAAS_HOST
+  login $NETRC_IO_BAAS_LOGIN
+  password $NETRC_IO_BAAS_PASSWORD
+"
+    else
+      log "Skipping sdk io-baas entry: set NETRC_IO_BAAS_HOST, NETRC_IO_BAAS_LOGIN, and NETRC_IO_BAAS_PASSWORD in .env"
+    fi
+  fi
+
+  if [ -n "$NETRC_CONTENT" ]; then
+    log "Creating ~/.netrc with permissions 600"
+    (umask 077; printf '%s' "$NETRC_CONTENT" > "$HOME/.netrc")
+    chmod 600 "$HOME/.netrc"
+  else
+    log "No ~/.netrc entries selected"
+  fi
+fi
+
 # --- Wire this repo's .zshrc into ~/.zshrc ---------------------------------
 SOURCE_LINE="source \"$DOTFILES_DIR/.zshrc\""
 if [ ! -f "$HOME/.zshrc" ] || ! grep -qxF "$SOURCE_LINE" "$HOME/.zshrc"; then

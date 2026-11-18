@@ -42,7 +42,8 @@ The script is **silent and idempotent** (it can be re-run; it skips what is alre
 4. **Git**: `user.name`/`user.email` from `.env`, `credential.helper`, and VS Code as editor *(optional, asks for confirmation)*.
 5. **GPG**: generates an RSA 4096 key (expires in 1 year, no passphrase) and configures commit and tag signing (`user.signingkey`, `commit.gpgsign`, `tag.gpgSign`).
 6. **SSH**: generates `~/.ssh/id_ed25519_yape`, adds it to the keychain and configures `~/.ssh/config` (`AddKeysToAgent`/`UseKeychain`).
-7. Adds `source "<repo>/.zshrc"` to `~/.zshrc` (creating it if it does not exist).
+7. **`~/.netrc`** *(optional, asks for confirmation for each entry)*: can create a JFrog entry for `facephicorp.jfrog.io` using `NETRC_FACEPHI_HOST`/`NETRC_FACEPHI_LOGIN`/`NETRC_FACEPHI_PASSWORD`, and an optional `sdk io-baas` entry using `NETRC_IO_BAAS_HOST`/`NETRC_IO_BAAS_LOGIN`/`NETRC_IO_BAAS_PASSWORD` from `.env`. The sdk entry is labeled with a comment; its `machine` value is the host from `.env`. The file is created with `600` permissions. An existing `~/.netrc` is never modified.
+8. Adds `source "<repo>/.zshrc"` to `~/.zshrc` (creating it if it does not exist).
 
 At the end it prints the commands to copy the GPG and SSH public keys (`| pbcopy`) and paste them into GitHub → Settings.
 

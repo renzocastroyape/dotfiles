@@ -22,6 +22,13 @@ log()  { printf '==> %s\n' "$1"; }
 skip() { printf '    %s (already installed, skipping)\n' "$1"; }
 fail() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
 
+# Ask the user a yes/no question; defaults to "no" (also when non-interactive)
+confirm() {
+  local reply=""
+  read -r -p "==> $1 [y/N] " reply || true
+  [[ "$reply" =~ ^[Yy]$ ]]
+}
+
 # --- Load user settings from .env -----------------------------------------
 # GIT_USER_NAME and GIT_USER_EMAIL live in .env (copy .env.template to .env)
 [ -f "$DOTFILES_DIR/.env" ] || fail "Missing $DOTFILES_DIR/.env (copy .env.template to .env and fill it in)"
@@ -47,27 +54,31 @@ HOMEBREW_PREFIX="$(brew --prefix)"
 log "Installing Brewfile packages (rbenv, nvm, mise, uv, gnupg)"
 brew bundle --file="$DOTFILES_DIR/Brewfile" --quiet >/dev/null
 
-# --- Oh My Zsh -------------------------------------------------------------
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-  log "Installing Oh My Zsh"
-  RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c \
-    "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" \
-    "" --unattended >/dev/null
-else
-  skip "Oh My Zsh"
-fi
-
-# .zshrc sources ~/.oh-my-zsh_config; create it from the Oh My Zsh template if missing
-if [ ! -f "$HOME/.oh-my-zsh_config" ]; then
-  log "Creating ~/.oh-my-zsh_config from Oh My Zsh template"
-  OMZ_TEMPLATE="$HOME/.oh-my-zsh/templates/zshrc.zsh-template"
-  if [ -f "$OMZ_TEMPLATE" ]; then
-    cp "$OMZ_TEMPLATE" "$HOME/.oh-my-zsh_config"
+# --- Oh My Zsh (optional) ---------------------------------------------------
+if confirm "Install and configure Oh My Zsh?"; then
+  if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    log "Installing Oh My Zsh"
+    RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c \
+      "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" \
+      "" --unattended >/dev/null
   else
-    curl -fsSL \
-      https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/templates/zshrc.zsh-template \
-      -o "$HOME/.oh-my-zsh_config"
+    skip "Oh My Zsh"
   fi
+
+  # .zshrc sources ~/.oh-my-zsh_config; create it from the Oh My Zsh template if missing
+  if [ ! -f "$HOME/.oh-my-zsh_config" ]; then
+    log "Creating ~/.oh-my-zsh_config from Oh My Zsh template"
+    OMZ_TEMPLATE="$HOME/.oh-my-zsh/templates/zshrc.zsh-template"
+    if [ -f "$OMZ_TEMPLATE" ]; then
+      cp "$OMZ_TEMPLATE" "$HOME/.oh-my-zsh_config"
+    else
+      curl -fsSL \
+        https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/templates/zshrc.zsh-template \
+        -o "$HOME/.oh-my-zsh_config"
+    fi
+  fi
+else
+  log "Skipping Oh My Zsh"
 fi
 
 # --- Ruby via rbenv --------------------------------------------------------
@@ -108,6 +119,9 @@ log "Configuring Git"
 git config --global user.name "$GIT_USER_NAME"
 git config --global user.email "$GIT_USER_EMAIL"
 git config --global credential.helper 'cache --timeout=3600'
+if confirm "Set VS Code as Git editor (core.editor \"code --wait\")?"; then
+  git config --global core.editor "code --wait"
+fi
 
 # --- GPG key ----------------------------------------------------------------
 # Unattended equivalent of `gpg --full-generate-key`:

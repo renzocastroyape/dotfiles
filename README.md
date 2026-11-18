@@ -37,9 +37,9 @@ cp .env.template .env   # fill in GIT_USER_NAME and GIT_USER_EMAIL
 The script is **silent and idempotent** (it can be re-run; it skips what is already installed) and performs:
 
 1. **Homebrew** (`NONINTERACTIVE` installation) and the [`Brewfile`](./Brewfile) packages via `brew bundle`.
-2. **Oh My Zsh** (`--unattended`) and creates `~/.oh-my-zsh_config` from the official template.
+2. **Oh My Zsh** *(optional, asks for confirmation)*: unattended install and creates `~/.oh-my-zsh_config` from the official template.
 3. **Ruby 3.4.12** (rbenv) + RubyGems 4.0.23, **Node.js 24** (nvm) and **Python 3.15** (uv).
-4. **Git**: `user.name`/`user.email` from `.env` and `credential.helper`.
+4. **Git**: `user.name`/`user.email` from `.env`, `credential.helper`, and VS Code as editor *(optional, asks for confirmation)*.
 5. **GPG**: generates an RSA 4096 key (expires in 1 year, no passphrase) and configures commit and tag signing (`user.signingkey`, `commit.gpgsign`, `tag.gpgSign`).
 6. **SSH**: generates `~/.ssh/id_ed25519_yape`, adds it to the keychain and configures `~/.ssh/config` (`AddKeysToAgent`/`UseKeychain`).
 7. Adds `source "<repo>/.zshrc"` to `~/.zshrc` (creating it if it does not exist).
@@ -111,6 +111,7 @@ source .venv/bin/activate
 git config --global user.name "$GIT_USER_NAME"
 git config --global user.email "$GIT_USER_EMAIL"
 git config --global credential.helper 'cache --timeout=3600'
+git config --global core.editor "code --wait"
 
 # GPG: RSA 4096 key (expires in 1y) + commit/tag signing
 gpg --batch --generate-key ...        # unattended, no passphrase

@@ -6,7 +6,8 @@ export PATH="$HOME/.local/bin:$PATH"
 #```
 # sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 #```
-source $HOME/.oh-my-zsh_config
+# Load Oh My Zsh config only if present (its install is optional in bootstrap.sh)
+[ -f "$HOME/.oh-my-zsh_config" ] && source "$HOME/.oh-my-zsh_config"
 
 # Homebrew (require ADMIN USER)
 #```

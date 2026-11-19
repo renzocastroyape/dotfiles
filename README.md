@@ -9,7 +9,7 @@ The applications mentioned in this repository are the **everyday** ones, and the
 | File | Description |
 | --- | --- |
 | [`bootstrap.sh`](./bootstrap.sh) | Silent, idempotent installation of the whole environment |
-| [`Brewfile`](./Brewfile) | Homebrew packages (`rbenv`, `nvm`, `mise`, `uv`, `gnupg`, `gh`, `copilot-cli`) for `brew bundle` |
+| [`Brewfile`](./Brewfile) | Homebrew packages (`rbenv`, `nvm`, `mise`, `uv`, `gnupg`, `gh`, `apm`, `copilot-cli`) for `brew bundle` |
 | [`.zshrc`](./.zshrc) | Zsh configuration: Oh My Zsh, Homebrew, rbenv, nvm, mise, uv/Python and GPG |
 | [`.gitconfig`](./.gitconfig) | Git configuration |
 | [`.env.template`](./.env.template) | Variables template (`GIT_USER_NAME`, `GIT_USER_EMAIL`); copy to `.env`, which is git-ignored |

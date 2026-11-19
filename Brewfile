@@ -8,5 +8,6 @@ brew "mise"    # Polyglot tool/version manager
 brew "uv"      # Python manager (Python 3.15, per-project venvs)
 brew "gnupg"   # GPG, used to sign commits
 brew "gh"      # GitHub CLI
+brew "apm"     # Agent Package Manager (AI agent configuration dependencies)
 
 cask "copilot-cli"   # GitHub Copilot CLI

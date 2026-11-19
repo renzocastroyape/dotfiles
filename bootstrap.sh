@@ -51,7 +51,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 HOMEBREW_PREFIX="$(brew --prefix)"
 
 # --- Brew packages (rbenv, nvm, mise, uv) ---------------------------------
-log "Installing Brewfile packages (rbenv, nvm, mise, uv, gnupg, gh, copilot-cli)"
+log "Installing Brewfile packages (rbenv, nvm, mise, uv, gnupg, gh, apm, copilot-cli)"
 brew bundle --file="$DOTFILES_DIR/Brewfile" --quiet >/dev/null
 
 # --- Oh My Zsh (optional) ---------------------------------------------------

@@ -7,3 +7,6 @@ brew "nvm"     # Node.js version manager (Node.js 24.x)
 brew "mise"    # Polyglot tool/version manager
 brew "uv"      # Python manager (Python 3.15, per-project venvs)
 brew "gnupg"   # GPG, used to sign commits
+brew "gh"      # GitHub CLI
+
+cask "copilot-cli"   # GitHub Copilot CLI

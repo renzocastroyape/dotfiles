@@ -51,3 +51,6 @@ eval "$(mise activate zsh)"
 # Python 3.15 NO es global: se activa por proyecto con `uv venv --python 3.15`
 # Usar los certificados del sistema (proxies corporativos)
 export UV_SYSTEM_CERTS=1
+
+# YAPE: ENV VARS
+export BCP_BIOMETRIC_ENABLED="NO" # or "YES"
